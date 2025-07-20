@@ -1,18 +1,24 @@
 import express from "express";
 import cors from "cors";
 import mongoose from 'mongoose';
+import path from 'path';
+import productsRouter from './routes/product';
 
-const { PORT = 3000, DB_ADDRESS='mongodb://127.0.0.1:27017/weblarek', UPLOAD_PATH, UPLOAD_PATH_TEMP } = process.env;
+const { PORT = 3000, DB_ADDRESS = 'mongodb://127.0.0.1:27017/weblarek', UPLOAD_PATH, UPLOAD_PATH_TEMP } = process.env;
 
 const app = express();
 
-const db=mongoose.connect(DB_ADDRESS);
+mongoose.connect(DB_ADDRESS);
 
 app.use(cors());
 
-app.get("/product", (req, res) => {
-  res.send([]);
-});
+app.use(express.json());
+
+app.use(express.urlencoded({ extended: true }));
+
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.use(productsRouter);
 
 app.listen(PORT, () => {
   console.log("listening on port 3000");
