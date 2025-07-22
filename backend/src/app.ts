@@ -1,11 +1,17 @@
 import express from "express";
 import cors from "cors";
-import mongoose from 'mongoose';
-import path from 'path';
-import productRouter from './routes/product';
-import orderRouter from './routes/order';
+import mongoose from "mongoose";
+import path from "path";
+import productRouter from "./routes/product";
+import orderRouter from "./routes/order";
+import { requestLogger, errorLogger } from "./middlewares/logger";
 
-const { PORT = 3000, DB_ADDRESS = 'mongodb://127.0.0.1:27017/weblarek', UPLOAD_PATH, UPLOAD_PATH_TEMP } = process.env;
+const {
+  PORT = 3000,
+  DB_ADDRESS = "mongodb://127.0.0.1:27017/weblarek",
+  UPLOAD_PATH,
+  UPLOAD_PATH_TEMP,
+} = process.env;
 
 const app = express();
 
@@ -17,11 +23,15 @@ app.use(express.json());
 
 app.use(express.urlencoded({ extended: true }));
 
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, "public")));
+
+app.use(requestLogger);
 
 app.use(productRouter);
 
 app.use(orderRouter);
+
+app.use(errorLogger);
 
 app.listen(PORT, () => {
   console.log("listening on port 3000");
