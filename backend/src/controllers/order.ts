@@ -1,60 +1,57 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import { faker } from "@faker-js/faker";
 import Product from "../models/product";
+import { BadRequestError } from '../errors/bad-request-error';
 
-export const createOrder = async (req: Request, res: Response) => {
+export const createOrder = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { payment, email, phone, address, total, items } = req.body;
 
     // Валидация полей
     if (!["card", "online"].includes(payment)) {
-      return res.status(400).json({ error: "Invalid payment method" });
+      return next(new BadRequestError("Не указан или неверный метод оплаты!"));
     }
 
     if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
-      return res.status(400).json({ error: "Invalid email" });
+      return next(new BadRequestError("Не указан или неверный email!"));
     }
 
     if (!phone || typeof phone !== "string") {
-      return res.status(400).json({ error: "Invalid phone" });
+      return next(new BadRequestError("Не указан телефон!"));
     }
 
     if (!address || typeof address !== "string") {
-      return res.status(400).json({ error: "Invalid address" });
+      return next(new BadRequestError("Не указан адрес!"));
     }
 
     if (!Array.isArray(items) || items.length === 0) {
-      return res.status(400).json({ error: "Items must be a non-empty array" });
+      return next(new BadRequestError("Не выбран товар!"));
     }
 
     // Получение товаров из базы
     const products = await Product.find({ _id: { $in: items } });
 
     if (products.length !== items.length) {
-      return res.status(400).json({ error: "Some items do not exist" });
+      return next(new BadRequestError("Товар не существует!"));
     }
 
     const invalidProducts = products.filter((p) => p.price == null);
     if (invalidProducts.length > 0) {
-      return res.status(400).json({ error: "Some items are not for sale" });
+      return next(new BadRequestError("Выбран товар без стоимости!"));
     }
 
     const calculatedTotal = products.reduce((sum, p) => sum + p.price, 0);
     if (calculatedTotal !== total) {
-      return res
-        .status(400)
-        .json({ error: "Total does not match product prices" });
+      return next(new BadRequestError("Стоимость товаров не равна общей сумме!"));
     }
 
-    // Генерация ID заказа
     const orderId = faker.string.uuid();
 
-    return res.status(201).json({
+    return res.status(201).send({
       id: orderId,
       total: calculatedTotal,
     });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: "Internal server error" });
+    next(error);
   }
 };

@@ -5,12 +5,12 @@ import path from "path";
 import productRouter from "./routes/product";
 import orderRouter from "./routes/order";
 import { requestLogger, errorLogger } from "./middlewares/logger";
+import { errors } from 'celebrate';
+import { errorHandler } from './middlewares/error-handler';
 
 const {
   PORT = 3000,
   DB_ADDRESS = "mongodb://127.0.0.1:27017/weblarek",
-  UPLOAD_PATH,
-  UPLOAD_PATH_TEMP,
 } = process.env;
 
 const app = express();
@@ -33,6 +33,10 @@ app.use(orderRouter);
 
 app.use(errorLogger);
 
+app.use(errors());
+
+app.use(errorHandler);
+
 app.listen(PORT, () => {
-  console.log("listening on port 3000");
+  console.log(`listening on port ${PORT}`);
 });
