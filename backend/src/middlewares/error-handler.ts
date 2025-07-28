@@ -8,5 +8,5 @@ export const errorHandler = (
     next: NextFunction
 ) => {
     const { statusCode = 500, message } = err;
-    res.status(statusCode).send({ message: message || 'Ошибка сервера' });
+    return res.status(statusCode).send({ message: message || 'Ошибка сервера' });
 };

@@ -1,4 +1,4 @@
-import { Error as MongooseError } from "mongoose";
+import { Error as MongooseError } from 'mongoose';
 
 export class BadRequestError extends Error {
     public statusCode: number;

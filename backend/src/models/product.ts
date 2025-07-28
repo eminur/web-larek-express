@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 interface IImage {
   fileName: string;
@@ -45,4 +45,4 @@ const productSchema = new mongoose.Schema<IProduct>({
   },
 });
 
-export default mongoose.model<IProduct>("Product", productSchema);
+export default mongoose.model<IProduct>('Product', productSchema);
